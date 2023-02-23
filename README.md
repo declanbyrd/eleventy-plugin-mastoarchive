@@ -13,7 +13,7 @@ npm i eleventy-plugin-mastoarchive
 Then include it in your Eleventy project file
 
 ```js
-const mastoArchive = require('../eleventy-plugin-mastoarchive');
+const mastoArchive = require('eleventy-plugin-mastoarchive');
 
 module.exports = (eleventyConfig) => {
   eleventyConfig.addPlugin(mastoArchive, {
