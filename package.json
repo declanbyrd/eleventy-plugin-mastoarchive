@@ -13,6 +13,10 @@
     "eleventy plugin",
     "11ty plugin"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/declanbyrd/eleventy-plugin-mastoarchive.git"
+  },
   "author": {
     "name": "Declan Byrd",
     "url": "https://declanbyrd.co.uk"
