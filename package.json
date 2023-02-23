@@ -1,0 +1,28 @@
+{
+  "name": "eleventy-plugin-mastoarchive",
+  "version": "0.1.0",
+  "description": "Expose your Mastodon posts to 11ty as a global data object",
+  "main": ".eleventy.js",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy"
+  },
+  "keywords": [
+    "11ty",
+    "eleventy",
+    "eleventy plugin",
+    "11ty plugin"
+  ],
+  "author": {
+    "name": "Declan Byrd",
+    "url": "https://declanbyrd.co.uk"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "node-fetch": "^2.6.9"
+  }
+}
