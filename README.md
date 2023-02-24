@@ -85,9 +85,10 @@ Each Mastodon post has the following properties:
 
 If the post contains a one or more images, the media property on the post will contain the following data:
 
-| image  | The URL of the image on the Mastodon server. |
-| ------ | -------------------------------------------- |
-| alt    | The ALT text of the image.                   |
-| width  | The width of the image in pixels.            |
-| height | The height of the image in pixels.           |
-| aspect | The aspect ratio of the image.               |
+| Property | Description                                  |
+| -------- | -------------------------------------------- |
+| image    | The URL of the image on the Mastodon server. |
+| alt      | The ALT text of the image.                   |
+| width    | The width of the image in pixels.            |
+| height   | The height of the image in pixels.           |
+| aspect   | The aspect ratio of the image.               |
