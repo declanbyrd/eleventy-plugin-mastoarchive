@@ -58,12 +58,17 @@ module.exports = (eleventyConfig, options) => {
 		return goodPosts;
 	};
 
-	const fetchMastodonPosts = async () => {
-		const response = await fetch(MASTODON_STATUS_API);
+	const fetchMastodonPosts = async (lastPost) => {
+		let url = MASTODON_STATUS_API;
+		if (lastPost) {
+			url = `${MASTODON_STATUS_API}?since_id=${lastPost}`;
+			console.log(`>>> Requesting posts made after ${lastPost.date}...`);
+		}
+		const response = await fetch(url);
 		if (response.ok) {
 			const feed = await response.json();
-			console.log(`>>> ${feed.length} new mastodon posts fetched`);
 			const timeline = formatTimeline(feed);
+			console.log(`>>> ${timeline.length} new mastodon posts fetched`);
 			return timeline;
 		}
 		console.warn('>>> unable to fetch mastodon posts', response.statusText);
@@ -90,28 +95,33 @@ module.exports = (eleventyConfig, options) => {
 		fs.writeFile(config.cacheLocation, fileContent, (err) => {
 			if (err) throw err;
 			console.log(
-				`>>> ${data.posts.length} mastodon posts cached to ${config.cacheLocation}`
+				`>>> ${data.posts.length} mastodon posts in total are now cached in ${config.cacheLocation}`
 			);
 		});
 	};
 
 	// Merge fresh posts with cached entries, unique per id
 	const mergePosts = (cache, feed) => {
-		return unionBy(cache.posts, feed, 'id');
+		const merged = unionBy(cache.posts, feed, 'id');
+		return merged
+			.sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+			.reverse();
 	};
 
 	eleventyConfig.addGlobalData('mastodon', async () => {
+		let lastPost;
 		console.log('>>> Reading mastodon posts from cache...');
 		const cache = readFromCache();
 
 		if (cache.posts.length) {
 			console.log(`>>> ${cache.posts.length} mastodon posts loaded from cache`);
+			lastPost = cache.posts[0];
 		}
 
 		// Only fetch new posts in production
 		if (config.isProduction) {
 			console.log('>>> Checking for new mastodon posts...');
-			const feed = await fetchMastodonPosts();
+			const feed = await fetchMastodonPosts(lastPost);
 			if (feed) {
 				const mastodonPosts = {
 					lastFetched: new Date().toISOString(),
