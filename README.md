@@ -1,8 +1,8 @@
 # eleventy-plugin-mastoarchive
 
-> Fetch your own posts from Mastodon so you can display them on your personal website.
+> Fetch your own public posts from Mastodon so you can display them on your personal website.
 
-## To Use
+## Getting Started
 
 First install the plugin in your project:
 
@@ -24,6 +24,28 @@ module.exports = (eleventyConfig) => {
 ```
 
 This will expose a global data object called `mastodon` which you can use in your Eleventy project.
+
+## Getting your Mastodon User ID
+
+I was able to retrieve my Mastodon user ID by monitoring the network requests made by the Mastodon server I belong to. On a device that is able to open developer tools, the steps I took were to:
+
+- With the developer tools open and the Network traffic visible, enter your username in the search box and trigger the network request by pressing enter on your keyboard.
+- Find the request that looks like `https://{mastodon_server}/api/v2/search?q=@{your_mastodon_username}` and open the response for that request. The response object should look like the one below.
+- Your account should be the first one that appears under `accounts`. The id of that account is your Mastodon user ID.
+
+```json
+{
+    "accounts":[
+        {
+            "id": {your user ID},
+            "username": {your Mastodon username},
+            ...
+        }
+    ],
+    "statuses":[],
+    "hashtags":[]
+}
+```
 
 ## Config Options
 
