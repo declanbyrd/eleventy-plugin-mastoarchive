@@ -61,7 +61,7 @@ module.exports = (eleventyConfig, options) => {
 	const fetchMastodonPosts = async (lastPost) => {
 		let url = MASTODON_STATUS_API;
 		if (lastPost) {
-			url = `${MASTODON_STATUS_API}?since_id=${lastPost}`;
+			url = `${MASTODON_STATUS_API}?since_id=${lastPost.id}`;
 			console.log(`>>> Requesting posts made after ${lastPost.date}...`);
 		}
 		const response = await fetch(url);
