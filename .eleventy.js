@@ -26,11 +26,7 @@ module.exports = (eleventyConfig, options) => {
 		const filtered = timeline.filter(
 			(post) =>
 				// remove posts that are already on your own site.
-				!config.removeSyndicates.some((url) => post.content.includes(url)) &&
-				// remove replies - these don't have the original context.
-				!post.in_reply_to_account_id &&
-				// remove reblogs - the original authors haven't given consent.
-				post.reblog === null
+				!config.removeSyndicates.some((url) => post.content.includes(url))
 		);
 		const formatted = filtered.map((post) => {
 			const images = post.media_attachments.map((image) => ({
@@ -59,12 +55,17 @@ module.exports = (eleventyConfig, options) => {
 	};
 
 	const fetchMastodonPosts = async (lastPost) => {
-		let url = `${MASTODON_STATUS_API}?limit=40`;
+		const queryParams = new URLSearchParams({
+			limit: 40,
+			exclude_replies: true,
+			exclude_reblogs: true,
+		});
 		if (lastPost) {
-			url = `${url}&since_id=${lastPost.id}`;
+			queryParams.set('since_id', lastPost.id);
 			console.log(`>>> Requesting posts made after ${lastPost.date}...`);
 		}
-		const response = await fetch(url);
+		const url = new URL(`${MASTODON_STATUS_API}?${queryParams}`);
+		const response = await fetch(url.href);
 		if (response.ok) {
 			const feed = await response.json();
 			const timeline = formatTimeline(feed);
