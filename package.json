@@ -1,6 +1,6 @@
 {
   "name": "eleventy-plugin-mastoarchive",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Expose your Mastodon posts to 11ty as a global data object",
   "main": ".eleventy.js",
   "scripts": {
@@ -10,8 +10,8 @@
   "keywords": [
     "11ty",
     "eleventy",
-    "eleventy plugin",
-    "11ty plugin"
+    "eleventy-plugin",
+    "11ty-plugin"
   ],
   "repository": {
     "type": "git",
