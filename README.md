@@ -80,6 +80,7 @@ Each Mastodon post has the following properties:
 | source_url | The original URL of the post.                                                                                             |
 | site       | Hard coded to "Mastodon".                                                                                                 |
 | media      | An object if a single image or no image is attached to the post, or an array if multiple images are attached to the post. |
+| emoji      | An array of custom emojis that were used in the post.                                                                     |
 
 ### Media objects
 
@@ -92,3 +93,12 @@ If the post contains a one or more images, the media property on the post will c
 | width    | The width of the image in pixels.            |
 | height   | The height of the image in pixels.           |
 | aspect   | The aspect ratio of the image.               |
+
+### Custom emoji
+
+If your post contains custom emoji, the emoji property will contain the following data:
+
+| Property  | Description                                                  |
+| --------- | ------------------------------------------------------------ |
+| shortcode | The shortcode for the emoji. In the format `:<emoji name>:`. |
+| url       | The static URL of the image on the Mastodon server.          |
