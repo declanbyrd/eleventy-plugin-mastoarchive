@@ -36,6 +36,10 @@ module.exports = (eleventyConfig, options) => {
 				height: image?.meta?.small?.height,
 				aspect: image?.meta?.small?.aspect,
 			}));
+			const customEmojis = post.emojis.map((emoji) => ({
+				shortcode: emoji.shortcode,
+				url: emoji.static_url,
+			}));
 			return {
 				date: new Date(post.created_at).toISOString(),
 				id: post.id,
@@ -43,6 +47,7 @@ module.exports = (eleventyConfig, options) => {
 				source_url: post.url,
 				site: 'Mastodon',
 				media: images,
+				emojis: customEmojis,
 			};
 		});
 		const goodPosts = formatted.filter((post) => {
@@ -51,6 +56,7 @@ module.exports = (eleventyConfig, options) => {
 			}
 			return true;
 		});
+
 		return goodPosts;
 	};
 
