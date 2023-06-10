@@ -25,6 +25,10 @@ module.exports = (eleventyConfig) => {
 
 This will expose a global data object called `mastodon` which you can use in your Eleventy project.
 
+On the first run, the plugin will fetch _all_ your public posts and then cache them to the location specified in `cacheLocation`. Each time posts are fetched after, only the posts made after the last cached post will be fetched.
+
+If you used versions < 0.2.0 you will need to clear your site's cache to get all your posts and not the most recent 40.
+
 ## Getting your Mastodon User ID
 
 I was able to retrieve my Mastodon user ID by monitoring the network requests made by the Mastodon server I belong to. On a device that is able to open developer tools, the steps I took were to:
