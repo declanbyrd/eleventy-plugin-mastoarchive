@@ -2,6 +2,8 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const unionBy = require('lodash/unionBy');
 
+const RESPONSE_SIZE = 40;
+
 module.exports = (eleventyConfig, options) => {
 	if (!options.host) {
 		console.error('No URL provided for the Mastodon server.');
@@ -60,15 +62,35 @@ module.exports = (eleventyConfig, options) => {
 		return goodPosts;
 	};
 
-	const fetchMastodonPosts = async (lastPost) => {
+	const fetchAllMastodonPosts = async () => {
+		let posts = [];
+		let nextResponse = posts;
+		do {
+			nextResponse = await fetchMastodonPosts({
+				beforePost: nextResponse[nextResponse.length - 1] || undefined,
+			});
+			// mergePosts expects a cached object {lastfetched: ..., posts: ...} as the first parameter
+			posts = mergePosts({ posts }, nextResponse);
+		} while (nextResponse.length !== 0);
+		return posts;
+	};
+
+	const fetchMastodonPosts = async ({
+		lastPost = undefined,
+		beforePost = undefined,
+	}) => {
 		const queryParams = new URLSearchParams({
-			limit: 40,
-			exclude_replies: true,
-			exclude_reblogs: true,
+			limit: `${RESPONSE_SIZE}`,
+			exclude_replies: 'true',
+			exclude_reblogs: 'true',
 		});
 		if (lastPost) {
 			queryParams.set('since_id', lastPost.id);
 			console.log(`>>> Requesting posts made after ${lastPost.date}...`);
+		}
+		if (beforePost) {
+			queryParams.set('max_id', beforePost.id);
+			console.log(`>>> Requesting posts made before ${beforePost.date}...`);
 		}
 		const url = new URL(`${MASTODON_STATUS_API}?${queryParams}`);
 		const response = await fetch(url.href);
@@ -127,8 +149,19 @@ module.exports = (eleventyConfig, options) => {
 
 		// Only fetch new posts in production
 		if (config.isProduction) {
-			console.log('>>> Checking for new mastodon posts...');
-			const feed = await fetchMastodonPosts(lastPost);
+			let feed;
+			if (cache.posts.length === 0) {
+				console.log(
+					'>>> Creating a complete archive of your mastodon posts...'
+				);
+				feed = await fetchAllMastodonPosts();
+				console.log(
+					`>>> Archive containing ${feed.length} posts has been fetched...`
+				);
+			} else {
+				console.log('>>> Checking for new mastodon posts...');
+				feed = await fetchMastodonPosts({ lastPost });
+			}
 			if (feed) {
 				const mastodonPosts = {
 					lastFetched: new Date().toISOString(),
