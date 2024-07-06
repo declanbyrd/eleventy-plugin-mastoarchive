@@ -28,7 +28,7 @@ module.exports = (eleventyConfig, options) => {
 	const MASTODON_STATUS_API = `${config.host}/api/v1/accounts/${config.userId}/statuses`;
 
 	const filterTagsFromContent = (postContentString) => {
-		if (options.stripHashtags) {
+		if (!options.stripHashtags) {
 			return {
 				tags: [],
 				postContent: postContentString,
