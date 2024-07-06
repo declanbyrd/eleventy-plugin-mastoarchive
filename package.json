@@ -26,6 +26,7 @@
     "@11ty/eleventy": "^2.0.0"
   },
   "dependencies": {
+    "jsdom": "^24.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^2.6.9"
   }

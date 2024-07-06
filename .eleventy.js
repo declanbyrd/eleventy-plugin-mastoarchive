@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
 const unionBy = require('lodash/unionBy');
+const jsdom = require('jsdom');
+const { JSDOM } = jsdom;
 
 const RESPONSE_SIZE = 40;
 
@@ -18,11 +20,67 @@ module.exports = (eleventyConfig, options) => {
 		removeSyndicates: [],
 		cacheLocation: '.cache/mastodon.json',
 		isProduction: true,
+		stripHashtags: false,
 	};
 
 	const config = { ...defaults, ...options };
 
 	const MASTODON_STATUS_API = `${config.host}/api/v1/accounts/${config.userId}/statuses`;
+
+	const filterTagsFromContent = (postContentString) => {
+		if (options.stripHashtags) {
+			return {
+				tags: [],
+				postContent: postContentString,
+			};
+		}
+		let postContent = `${postContentString}`;
+		const postContentHtml = new JSDOM(postContent);
+		const internalLinks =
+			postContentHtml.window.document.querySelectorAll('.hashtag');
+
+		const tags = Array.from(internalLinks).map(
+			(link) => link.firstElementChild.textContent
+		);
+
+		internalLinks.forEach((link) => {
+			// hashtags at end of post on new line
+			if (
+				Array.from(link.parentNode.childNodes).some(
+					(child) =>
+						child.nodeType === postContentHtml.window.Node.TEXT_NODE &&
+						child.textContent === ' '
+				)
+			) {
+				postContent = postContent.replace(link.parentNode.outerHTML, '');
+			}
+
+			// hashtags at end of post on same line as content
+			if (
+				link.parentNode?.lastElementChild?.outerHTML === link.outerHTML &&
+				link.parentNode?.children.length === 1
+			) {
+				postContent = postContent.replace(
+					link.parentNode?.lastElementChild?.outerHTML,
+					''
+				);
+			}
+
+			// inline hashtags
+			postContent = postContent.replace(
+				link.outerHTML,
+				link.firstElementChild.textContent
+			);
+		});
+
+		// any parent <p> tags that used to contain hashtags that have now been removed
+		postContent = postContent.replaceAll('<p></p>', '');
+
+		return {
+			tags: tags,
+			postContent,
+		};
+	};
 
 	const formatTimeline = (timeline) => {
 		const filtered = timeline.filter(
@@ -42,14 +100,18 @@ module.exports = (eleventyConfig, options) => {
 				shortcode: emoji.shortcode,
 				url: emoji.static_url,
 			}));
+
+			const { postContent, tags } = filterTagsFromContent(post.content);
+
 			return {
 				date: new Date(post.created_at).toISOString(),
 				id: post.id,
-				content: post.content,
+				content: postContent,
 				source_url: post.url,
 				site: 'Mastodon',
 				media: images,
 				emojis: customEmojis,
+				tags,
 			};
 		});
 		const goodPosts = formatted.filter((post) => {
